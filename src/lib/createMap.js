@@ -7,6 +7,7 @@ import downloadGroupGraph from "./downloadGroupGraph.js";
 import getComplimentaryColor from "./getComplimentaryColor";
 import createLabelEditor from "./label-editor/createLabelEditor";
 import getColorTheme from "./getColorTheme";
+import speechKeywords from "./speechKeywords.js";
 // import { createRadialGradient } from './gl/createRadialGradient';
 
 const primaryHighlightColor = "#bf2072";
@@ -19,6 +20,10 @@ currentColorTheme.color.forEach((row) => {
   colorStyle.push(["==", ["get", "fill"], row.input], row.output);
 })
 colorStyle.push("#FF0000");
+
+// Build a filter expression that keeps only repositories with speech-related keywords
+const keywordFilters = speechKeywords.map(k => ['>=', ['index-of', k.toLowerCase(), ['downcase', ['get', 'label']]], 0]);
+const speechFilter = ['any', ...keywordFilters];
 
 export default function createMap() {
   const map = new maplibregl.Map(getDefaultStyle());
@@ -361,7 +366,7 @@ function getDefaultStyle() {
           "type": "circle",
           "source": "points-source",
           "source-layer": "points",
-          "filter": ["==", "$type", "Point"],
+          "filter": ["all", ["==", "$type", "Point"], speechFilter],
           "paint": {
             "circle-color": currentColorTheme.circleColor,
             "circle-opacity": [
@@ -394,7 +399,7 @@ function getDefaultStyle() {
           "type": "symbol",
           "source": "points-source",
           "source-layer": "points",
-          "filter": [">=", ["zoom"], 8],
+          "filter": ["all", [">=", ["zoom"], 8], speechFilter],
           "layout": {
             "text-font": [ "Roboto Condensed Regular" ],
             "text-field": ["slice", ["get", "label"], ["+", ["index-of", "/", ["get", "label"]], 1]],
