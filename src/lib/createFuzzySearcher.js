@@ -2,6 +2,7 @@ import fuzzysort from 'fuzzysort';
 import log from './log.js';
 import config from './config.js';
 import dedupingFetch from './dedupingFetch.js';
+import speechKeywords from './speechKeywords.js';
 
 const fetchedIndex = new Set();
 const seenWords = new Set();
@@ -26,9 +27,11 @@ export default function createFuzzySearcher() {
     if (!fetchedIndex.has(cacheKey)) {
       const p = dedupingFetch(`${config.namesEndpoint}/${cacheKey}.json`).then(data => {
         data.forEach(word => {
-          if (!seenWords.has(word[0])) {
-            words.push({name: word[0], lat: word[1], lon: word[2]});
-            seenWords.add(word[0]);
+          const name = word[0];
+          const lower = name.toLowerCase();
+          if (!seenWords.has(name) && speechKeywords.some(k => lower.includes(k))) {
+            words.push({name, lat: word[1], lon: word[2]});
+            seenWords.add(name);
           }
         });
         fetchedIndex.add(cacheKey);
