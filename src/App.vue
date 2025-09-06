@@ -184,17 +184,8 @@ async function listCurrentConnections() {
     <div class="unsaved-changes" v-if='hasUnsavedChanges'>
       You have unsaved labels in local storage. <a href="#" @click.prevent="showUnsavedChanges()" class="normal">Click here</a> to see them.
     </div>
-    <div class="made-by">
-      Made by
-      <a class="normal" aria-label="Made by @anvaka" target="_blank" href="https://github.com/sponsors/anvaka">
-        @anvaka
-      </a>
-    </div>
-    <div class="top-right-support" v-if="supportMessageVisible && !aboutVisible && !smallPreviewName && !currentGroup && !currentFocus">
-      <span class="close-support" @click="supportMessageVisible = false">×</span>
-      Enjoying this map? <br>
-      <a href='https://www.paypal.com/paypalme/anvakos/5' target="_blank">Support the author</a>
-    </div>
+    <!-- Branding removed -->
+    <!-- Support box removed -->
     <largest-repositories :repos="currentGroup" v-if="currentGroup"
       class="right-panel"
       @selected="findProject"

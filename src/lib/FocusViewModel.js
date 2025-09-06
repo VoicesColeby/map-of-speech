@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { isSpeechName, computeSpeechScore } from './speechKeywords.js';
 import { buildLocalNeighborsGraphForGroup } from './downloadGroupGraph';
 import downloadGroupGraph from './downloadGroupGraph';
 import { createMaplibreSubgraphViewer } from './createMaplibreSubgraphViewer';
@@ -33,10 +34,12 @@ export default class FocusViewModel {
           return;
         }
         seen.add(node.id);
+        if (!isSpeechName(node.id)) return;
         neighbors.push({
           name: node.id,
           lngLat: node.data.l,
-          isExternal: !!(link.data?.e)
+          isExternal: !!(link.data?.e),
+          score: computeSpeechScore(node.id)
         });
       });
 

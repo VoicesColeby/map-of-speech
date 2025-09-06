@@ -7,7 +7,7 @@ import downloadGroupGraph from "./downloadGroupGraph.js";
 import getComplimentaryColor from "./getComplimentaryColor";
 import createLabelEditor from "./label-editor/createLabelEditor";
 import getColorTheme from "./getColorTheme";
-import speechKeywords from "./speechKeywords.js";
+import speechKeywords, { isSpeechName, computeSpeechScore } from "./speechKeywords.js";
 // import { createRadialGradient } from './gl/createRadialGradient';
 
 const primaryHighlightColor = "#bf2072";
@@ -134,6 +134,7 @@ export default function createMap() {
   function showDetails(nearestCity) {
     const repo = nearestCity.properties.label
     if (!repo) return;
+    if (!isSpeechName(repo)) return; // enforce speech-only
     const [lat, lon] = nearestCity.geometry.coordinates
     bus.fire("show-tooltip");
     bus.fire("repo-selected", { text: repo, lat, lon });
@@ -151,9 +152,12 @@ export default function createMap() {
             return b.properties.size - a.properties.size;
           });
           for (let repo of largeRepositories) {
+            const name = repo.properties.label;
+            if (!isSpeechName(name)) continue; // filter non-speech
             let v = {
-              name: repo.properties.label,
+              name,
               lngLat: repo.geometry.coordinates,
+              score: computeSpeechScore(name),
             }
             if (seen.has(repo.properties.label)) continue;
             seen.set(repo.properties.label, v);
@@ -237,6 +241,9 @@ export default function createMap() {
         const fromGeo = renderedNodesAdjustment.get(link.fromId)?.lngLat || groupGraph.getNode(link.fromId).data.l;
         const toGeo = renderedNodesAdjustment.get(link.toId)?.lngLat || groupGraph.getNode(link.toId).data.l;
 
+        // speech-only edges and nodes
+        if (!isSpeechName(link.fromId) || !isSpeechName(link.toId)) return;
+
         const from = maplibregl.MercatorCoordinate.fromLngLat(fromGeo);
         const to = maplibregl.MercatorCoordinate.fromLngLat(toGeo);
         const isFirstLevel = repo === link.fromId || repo === link.toId;
@@ -254,7 +261,7 @@ export default function createMap() {
             highlightedNodes.features.push({
               type: "Feature",
               geometry: {type: "Point", coordinates: primaryNodePosition},
-              properties: {color: primaryHighlightColor, name: repo, background: fillColor, textSize: 1.2}
+              properties: {color: primaryHighlightColor, name: repo, background: fillColor, textSize: 1.2, score: computeSpeechScore(repo)}
             });
           } 
           let otherName = repo === link.fromId ? link.toId : link.fromId;
@@ -262,7 +269,7 @@ export default function createMap() {
           highlightedNodes.features.push({
             type: "Feature",
             geometry: {type: "Point", coordinates: repo === link.fromId ? toGeo : fromGeo},
-            properties: {color: secondaryHighlightColor, name: otherName, background: fillColor, textSize: 0.8}
+            properties: {color: secondaryHighlightColor, name: otherName, background: fillColor, textSize: 0.8, score: computeSpeechScore(otherName)}
           });
         } else fastLinesLayer.addLine(line);
       });
@@ -300,6 +307,12 @@ export default function createMap() {
 }
 
 function getDefaultStyle() {
+  if (!config.vectorTilesTiles || !config.bordersSource || !config.glyphsSource) {
+    const el = document.getElementById('map');
+    if (el) {
+      el.innerHTML = '<div style="padding:8px">Data endpoints are not configured. Please set window.__APP_CONFIG__ with your dataBaseUrl and dataVersion.</div>';
+    }
+  }
   return {
     hash: true,
     container: "map",

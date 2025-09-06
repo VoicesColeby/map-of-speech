@@ -1,6 +1,8 @@
 <script setup>
 import { computed, reactive, watch, onBeforeUnmount, ref, defineEmits} from 'vue';
 import {getRepoInfo, getReadme, setAuthToken, getCurrentUser} from '../lib/githubClient.js';
+import config from '../lib/config.js';
+import { computeSpeechScore } from '../lib/speechKeywords.js';
 const props = defineProps({
   name: {
     type: String,
@@ -99,20 +101,21 @@ function fetchRepositoryInformation() {
 fetchRepositoryInformation();
 
 function getOauthLink() {
-  let isDev = window.location.hostname !== 'anvaka.github.io';
-  const clientId = isDev ? '244bf05034e7cf9158cc' : '5f5bbe0c2623f5a7e738';
-  let authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}`;
-  if (isDev) {
-    const redirectUri = `http://localhost:${window.location.port}/oauth.html`;
-    authUrl += `&redirect_uri=${encodeURIComponent(redirectUri)}`;
-  }
+  if (!config.oauth?.enabled) return '';
+  const clientId = config.oauth.clientId;
+  const redirectUri = config.oauth.redirectUri || `${window.location.origin}/oauth.html`;
+  if (!clientId) return '';
+  let authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
   return authUrl;
 }
 
 function signInWithGithub(e) {
   e.preventDefault();
+  if (!config.oauth?.enabled) return;
+  const url = getOauthLink();
+  if (!url) return;
   const windowFeatures = 'width=800,height=600,resizable=yes,scrollbars=yes,status=yes';
-  window.open(getOauthLink(), 'GitHub OAuth', windowFeatures);
+  window.open(url, 'GitHub OAuth', windowFeatures);
 }
 
 function receiveMessage(event) {
@@ -163,6 +166,7 @@ function listConnections() {
             </svg>
             {{ repoInfo.forks }}</span>
         </div>
+        <div class="score">Speech score: <b>{{ computeSpeechScore(name) }}</b></div>
 
         <div class="tags" v-if="repoInfo.topics?.length">
           <a v-for="tag in repoInfo.topics" :key="tag" class="tag" :href="'https://github.com/topics/' + tag" target="_blank">{{ tag }}</a>
@@ -180,8 +184,8 @@ function listConnections() {
       <div v-if="repoInfo.state === 'ERROR'" class="not-found">
         {{ repoInfo.error }}
       </div>
-      <div v-if="isAnonymous && repoInfo.state !== 'LOADING'" class="sign-in-container">
-        <a :href="getOauthLink()" @click="signInWithGithub" class="sign-in" >Sign in with Github</a> to get higher rate limits and more information about this repository.
+      <div v-if="config.oauth?.enabled && isAnonymous && repoInfo.state !== 'LOADING'" class="sign-in-container">
+        <a :href="getOauthLink()" @click="signInWithGithub" class="sign-in" >Sign in with GitHub</a> to get higher rate limits and more information about this repository.
         <span v-if="repoInfo && repoInfo.remainingRequests !== undefined">
           Remaining requests: <code>{{ repoInfo.remainingRequests }}</code>
         </span>

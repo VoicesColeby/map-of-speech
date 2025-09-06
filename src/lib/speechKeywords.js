@@ -1,4 +1,4 @@
-export default [
+const keywords = [
   // Tasks / problems
   'automatic speech recognition', 'asr', 'speech-to-text', 'stt',
   'text-to-speech', 'tts', 'speech synthesis', 'voice cloning', 'neural tts',
@@ -25,3 +25,19 @@ export default [
   'conversational ai pm', 'voice assistant pm', 'nlp scientist (speech)',
   'voice', 'speech', 'audio', 'assistant', 'asr', 'tts', 'conversational', 'spoken language', 'dialog', 'alexa', 'siri', 'cortana'
 ];
+
+export default keywords;
+
+export function computeSpeechScore(name) {
+  if (!name) return 0;
+  const lower = String(name).toLowerCase();
+  let hit = 0;
+  for (const k of keywords) {
+    if (lower.includes(k)) hit += 1;
+  }
+  return hit;
+}
+
+export function isSpeechName(name) {
+  return computeSpeechScore(name) > 0;
+}

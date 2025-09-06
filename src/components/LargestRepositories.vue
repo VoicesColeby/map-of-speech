@@ -38,7 +38,7 @@ function getLink(repo) {
   </a>In this country</h2>
       <ul v-if="props.repos.largest.length">
         <li v-for="repo in props.repos.largest" :key="repo.name">
-          <a :href="getLink(repo)" @click.prevent="showDetails(repo)" target="_blank">{{repo.name}}</a>
+          <a :href="getLink(repo)" @click.prevent="showDetails(repo)" target="_blank">{{repo.name}} <span v-if="repo.score">({{ repo.score }})</span></a>
         </li>
       </ul>
       <div v-else>

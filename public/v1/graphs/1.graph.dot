@@ -1,0 +1,9 @@
+digraph G {
+  "openai/whisper" [l="0,0"];
+  "mozilla/DeepSpeech" [l="0,5"];
+  "coqui-ai/TTS" [l="5,0"];
+
+  "openai/whisper" -> "mozilla/DeepSpeech";
+  "openai/whisper" -> "coqui-ai/TTS";
+}
+

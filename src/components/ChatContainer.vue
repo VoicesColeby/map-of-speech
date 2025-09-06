@@ -51,7 +51,7 @@ function clearKey() {
 </script>
 <template>
 <div>
-  <h2>Chat with ChatGPT <a href="#" @click="clearKey()" v-if="openAIToken" class="clear-key">clear key</a></h2>
+  <h2>Chat (optional) <a href="#" @click="clearKey()" v-if="openAIToken" class="clear-key">clear key</a></h2>
   <form v-if="!openAIToken" @submit.prevent="saveToken">
     <div>{{ props.description }}</div>
     Enter your <a href="https://platform.openai.com/account/api-keys" target="_blank" class="critical">OpenAI API token</a> 

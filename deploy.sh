@@ -1,11 +1,15 @@
 #!/bin/sh
+set -e
 rm -rf ./dist
 npm run build
 cd ./dist
 touch .nojekyll
 git init
 git add .
-git commit -m 'push to gh-pages'
-## Change the line below to deploy to your gh-pages
-git push --force git@github.com:anvaka/map-of-github.git main:gh-pages
+git commit -m 'deploy to gh-pages'
+
+# Set your repository remote below (owner/repo)
+# Example: git push --force git@github.com:YOUR_GH_USERNAME/YOUR_REPO.git main:gh-pages
+echo "Please set your GitHub remote and uncomment the push command."
+# git push --force git@github.com:YOUR_GH_USERNAME/YOUR_REPO.git main:gh-pages
 cd ../

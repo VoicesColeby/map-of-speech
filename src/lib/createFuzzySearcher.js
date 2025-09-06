@@ -18,6 +18,9 @@ export default function createFuzzySearcher() {
   return api;
 
   function find(query) {
+    if (!config.namesEndpoint) {
+      return Promise.resolve([]);
+    }
     if (lastPromise) {
       lastPromise.cancel();
     }

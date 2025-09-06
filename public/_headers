@@ -1,0 +1,31 @@
+# Global CORS for app and data
+/*
+  Access-Control-Allow-Origin: *
+
+# Long cache for vector tiles and fonts
+/v1/points/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+  X-Content-Type-Options: nosniff
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+  X-Content-Type-Options: nosniff
+
+# Names and graphs can be cached moderately
+/v1/names/*
+  Cache-Control: public, max-age=86400
+  Access-Control-Allow-Origin: *
+
+/v1/graphs/*
+  Cache-Control: public, max-age=86400
+  Access-Control-Allow-Origin: *
+
+/v1/borders.geojson
+  Cache-Control: public, max-age=86400
+  Access-Control-Allow-Origin: *
+
+/v1/places.geojson
+  Cache-Control: public, max-age=86400
+  Access-Control-Allow-Origin: *
